@@ -12,5 +12,10 @@ namespace TestSuperSE
     /// </summary>
     public class SEExtension : StorageServerExtension
     {
+        [ExtensionMethod]
+        public string Test()
+        {
+            return "Hello, client!!!";
+        }
     }
 }
