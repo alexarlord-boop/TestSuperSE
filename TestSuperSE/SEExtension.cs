@@ -17,5 +17,12 @@ namespace TestSuperSE
         {
             return "Hello, client!!!";
         }
+
+        [ExtensionMethod]
+        public string GetTotalPriceBackAndForth(string airportCode, DateTime flightDate, DateTime arrivalDate)
+        {
+            return string.Format("{0}\n{1}\n{2}", airportCode, flightDate+"", arrivalDate+"");
+        }
+
     }
 }
