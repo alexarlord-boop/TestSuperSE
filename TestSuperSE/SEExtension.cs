@@ -25,44 +25,47 @@ namespace TestSuperSE
         [ExtensionMethod]
         public string GetTotalPriceBackAndForth(string airportCode, DateTime flightDate, DateTime arrivalDate)
         {
-            // forth ticket 
-            string urlForth = "http://map.aviasales.ru/prices.json?origin_iata=LED&period=" + flightDate.Date.ToString() + ":month&direct=true&one_way=true&no_visa=false&schengen=false&need_visa=false&locale=ru";
-            string resultF = getContent(urlForth);
-            List<TicketData> ticketsDataF = JsonConvert.DeserializeObject<List<TicketData>>(resultF);
 
-            decimal minPriceF = ticketsDataF
-                .Where(x => x.destination == airportCode)
-                .Select(p => p.value)
-                .Min();
+            TicketData ticketF = getMinPriceTicketOnDate(flightDate, "LED", airportCode);
+            TicketData ticketB = getMinPriceTicketOnDate(arrivalDate, airportCode, "LED");
 
-            TicketData minTicketF = ticketsDataF
-                .FirstOrDefault(x =>
-                x.destination == airportCode
-                && x.value == minPriceF);
-
-            // back ticket 
-            string urlBack = "http://map.aviasales.ru/prices.json?origin_iata="+ airportCode +"&period=" + arrivalDate.Date.ToString() + ":month&direct=true&one_way=true&no_visa=false&schengen=false&need_visa=false&locale=ru";
-            string resultB = getContent(urlForth);
-            List<TicketData> ticketsDataB = JsonConvert.DeserializeObject<List<TicketData>>(resultB);
-
-            decimal minPriceB = ticketsDataB
-                .Where(x => x.destination == "LED")
-                .Select(p => p.value)
-                .Min();
-
-            TicketData minTicketB = ticketsDataB
-                .FirstOrDefault(x =>
-                x.destination == "LED"
-                && x.value == minPriceB);
-
-            decimal totalPrice = minPriceF + minPriceB;
+            if (ticketB == null || ticketF == null)
+            {
+                return "";
+            }
+            else
+            {
+                decimal total = ticketF.value + ticketB.value;
+                return total + "";
+            }
 
 
-            return totalPrice.ToString();
         }
 
         [ExtensionMethod]
-        private string getContent(string url)
+        private  TicketData getMinPriceTicketOnDate(DateTime flightDate, string origin, string destination)
+        {
+            string date = flightDate.Date.ToString("yyyy-MM-dd");
+            string urlForth = "http://map.aviasales.ru/prices.json?origin_iata=" + origin + "&period=" + date + ":month&direct=true&one_way=true&no_visa=false&schengen=false&need_visa=false&locale=ru";
+            string resultF = getContent(urlForth);
+            List<TicketData> ticketsData = JsonConvert.DeserializeObject<List<TicketData>>(resultF);
+            var tickets = ticketsData
+                .Where(x => x.destination == destination
+                    && x.depart_date.Date.ToString("yyyy-MM-dd") == date).ToArray();
+
+            if (tickets.Length == 0)
+            {
+                return null;
+            }
+            else
+            {
+                decimal minPrice = tickets.Select(t => t.value).Min();
+                return tickets.FirstOrDefault(t => t.value == minPrice);
+            }
+        }
+
+        [ExtensionMethod]
+        private  string getContent(string url)
         {
             HttpWebRequest request =
             (HttpWebRequest)WebRequest.Create(url);
@@ -78,6 +81,5 @@ namespace TestSuperSE
             response.Close();
             return output.ToString();
         }
-
     }
 }
