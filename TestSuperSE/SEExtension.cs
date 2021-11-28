@@ -43,11 +43,11 @@ namespace TestSuperSE
         }
 
         [ExtensionMethod]
-        private  TicketData getMinPriceTicketOnDate(DateTime flightDate, string origin, string destination)
+        public TicketData getMinPriceTicketOnDate(DateTime flightDate, string origin, string destination)
         {
             string date = flightDate.Date.ToString("yyyy-MM-dd");
             string urlForth = "http://map.aviasales.ru/prices.json?origin_iata=" + origin + "&period=" + date + ":month&direct=true&one_way=true&no_visa=false&schengen=false&need_visa=false&locale=ru";
-            string resultF = getContent(urlForth);
+            string resultF = GetContent(urlForth);
             List<TicketData> ticketsData = JsonConvert.DeserializeObject<List<TicketData>>(resultF);
             var tickets = ticketsData
                 .Where(x => x.destination == destination
@@ -65,7 +65,7 @@ namespace TestSuperSE
         }
 
         [ExtensionMethod]
-        private  string getContent(string url)
+        public string GetContent(string url)
         {
             HttpWebRequest request =
             (HttpWebRequest)WebRequest.Create(url);
